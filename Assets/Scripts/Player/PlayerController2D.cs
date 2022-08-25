@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Player
@@ -9,17 +10,28 @@ namespace Player
         [Header("Jump")] [SerializeField] private float jumpSpeed = 30f;
         [SerializeField] private float fallMultiplier = 2.5f;
         [SerializeField] private float lowJumpMultiplier = 1.8f;
-
+        [SerializeField] private LayerMask groundLayer;
+        [SerializeField] private Transform groundCheckCenter;
+        
         private Rigidbody2D rb;
+        private BoxCollider2D boxCollider;
 
         private Vector2 moveInput;
         private bool isFacingRight = true;
 
+        private const float groundedSize = 0.025f;
         private bool isJumping;
+        private Vector2 groundBoxSize;
+
+        private void Awake()
+        {
+            rb = GetComponent<Rigidbody2D>();
+            boxCollider = GetComponent<BoxCollider2D>();
+        }
 
         private void Start()
         {
-            rb = GetComponent<Rigidbody2D>();
+            groundBoxSize = new Vector2(boxCollider.size.x, groundedSize);
         }
 
         private void Update()
@@ -38,9 +50,13 @@ namespace Player
         {
             rb.velocity = moveInput;
 
-            if (!isJumping) return;
-            rb.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
-            isJumping = false;
+            if (isJumping && IsGrounded())
+            {
+                rb.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
+                isJumping = false;
+            }
+
+            CheckJumpGravity();
         }
 
         private void CheckJumpGravity()
@@ -71,6 +87,11 @@ namespace Player
             {
                 isFacingRight = !isFacingRight;
             }
+        }
+
+        private bool IsGrounded()
+        {
+            return Physics2D.OverlapBox(groundCheckCenter.position, groundBoxSize, 0f, groundLayer);
         }
     }
 }
