@@ -5,14 +5,18 @@ namespace Player
 {
     public class PlayerController2D : MonoBehaviour
     {
-        [SerializeField] private float speed;
+        [Header("Run")] [SerializeField] private float speed;
+        [SerializeField, Range(0.01f, 10)] private float runAcceleration;
+        [SerializeField, Range(0.01f, 10)] private float runDeceleration;
 
         [Header("Jump")] [SerializeField] private float jumpSpeed = 30f;
         [SerializeField] private float fallMultiplier = 2.5f;
         [SerializeField] private float lowJumpMultiplier = 1.8f;
+        [SerializeField, Range(0.01f, 0.5f)] private float coyoteTime;
+        [SerializeField, Range(0.01f, 0.5f)] private float jumpInputTime;
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private Transform groundCheckCenter;
-        
+
         private Rigidbody2D rb;
         private BoxCollider2D boxCollider;
 
@@ -20,6 +24,8 @@ namespace Player
         private bool isFacingRight = true;
 
         private const float groundedSize = 0.025f;
+        private float lastGroundedTime;
+        private float lastJumpTime;
         private bool isJumping;
         private Vector2 groundBoxSize;
 
@@ -36,11 +42,13 @@ namespace Player
 
         private void Update()
         {
-            moveInput = new Vector2(Input.GetAxisRaw("Horizontal") * speed, rb.velocity.y);
+            TimersCheck();
+
+            moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), rb.velocity.y);
 
             if (Input.GetButtonDown("Jump"))
             {
-                isJumping = true;
+                lastJumpTime = jumpInputTime;
             }
 
             CheckPlayerDirection();
@@ -48,15 +56,43 @@ namespace Player
 
         private void FixedUpdate()
         {
-            rb.velocity = moveInput;
+            Run();
 
-            if (isJumping && IsGrounded())
+            if (CanJump())
             {
-                rb.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
-                isJumping = false;
+                Jump();
             }
 
             CheckJumpGravity();
+        }
+
+        private void TimersCheck()
+        {
+            lastGroundedTime -= Time.deltaTime;
+            lastJumpTime -= Time.deltaTime;
+
+            if (IsGrounded())
+            {
+                lastGroundedTime = coyoteTime;
+            }
+        }
+
+        private void Run()
+        {
+            var targetSpeed = moveInput.x * speed;
+            var speedDiff = targetSpeed - rb.velocity.x;
+            var accelerationRate = (MathF.Abs(targetSpeed) > 0.01f) ? runAcceleration : runDeceleration;
+            var movement = speedDiff * accelerationRate;
+
+            rb.AddForce(movement * Vector2.right);
+        }
+
+        private void Jump()
+        {
+            rb.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
+            lastGroundedTime = 0;
+            lastJumpTime = 0;
+            isJumping = true;
         }
 
         private void CheckJumpGravity()
@@ -71,6 +107,7 @@ namespace Player
                     return;
                 default:
                     rb.gravityScale = 1f;
+                    isJumping = false;
                     break;
             }
         }
@@ -92,6 +129,11 @@ namespace Player
         private bool IsGrounded()
         {
             return Physics2D.OverlapBox(groundCheckCenter.position, groundBoxSize, 0f, groundLayer);
+        }
+
+        private bool CanJump()
+        {
+            return lastGroundedTime > 0 && lastJumpTime > 0 && !isJumping;
         }
     }
 }
