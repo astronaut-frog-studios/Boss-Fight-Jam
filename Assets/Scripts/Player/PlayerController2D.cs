@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public class PlayerController2D : MonoBehaviour
+    public abstract class PlayerController2D : MonoBehaviour
     {
         [Header("Run")] [SerializeField] private float speed;
         [SerializeField, Range(0.01f, 10)] private float runAcceleration;
@@ -17,30 +17,30 @@ namespace Player
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private Transform groundCheckCenter;
 
-        private Rigidbody2D rb;
+        protected Rigidbody2D rb;
         private BoxCollider2D boxCollider;
 
-        private Vector2 moveInput;
+        protected Vector2 moveInput;
         private bool isFacingRight = true;
 
         private const float groundedSize = 0.025f;
-        private float lastGroundedTime;
-        private float lastJumpTime;
+        public float lastGroundedTime;
+        public float lastJumpTime;
         private bool isJumping;
         private Vector2 groundBoxSize;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
             boxCollider = GetComponent<BoxCollider2D>();
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             groundBoxSize = new Vector2(boxCollider.size.x, groundedSize);
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             TimersCheck();
 
@@ -54,7 +54,7 @@ namespace Player
             CheckPlayerDirection();
         }
 
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             Run();
 
@@ -90,7 +90,6 @@ namespace Player
         private void Jump()
         {
             rb.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
-            lastGroundedTime = 0;
             lastJumpTime = 0;
             isJumping = true;
         }
@@ -126,14 +125,14 @@ namespace Player
             }
         }
 
-        private bool IsGrounded()
+        protected bool IsGrounded()
         {
             return Physics2D.OverlapBox(groundCheckCenter.position, groundBoxSize, 0f, groundLayer);
         }
 
         private bool CanJump()
         {
-            return lastGroundedTime > 0 && lastJumpTime > 0 && !isJumping;
+            return lastGroundedTime > 0 && lastJumpTime >= 0 && !isJumping;
         }
     }
 }
