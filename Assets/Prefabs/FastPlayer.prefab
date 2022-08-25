@@ -42,7 +42,6 @@ GameObject:
   - component: {fileID: 3606456115369684554}
   - component: {fileID: 3606456115369684555}
   - component: {fileID: 3606456115369684916}
-  - component: {fileID: 3606456115369684912}
   - component: {fileID: 3606456115369684913}
   - component: {fileID: 7110894124766502821}
   m_Layer: 3
@@ -110,7 +109,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 1
   m_Sprite: {fileID: 81908306, guid: 0c2bd77eb862c0c43b0a3a46639a8680, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -143,22 +142,6 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!58 &3606456115369684912
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3606456115369684552}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.0029149055, y: 0.81927556}
-  serializedVersion: 2
-  m_Radius: 0.8647855
 --- !u!61 &3606456115369684913
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -169,7 +152,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.015501738, y: 0.7798738}
@@ -203,18 +186,22 @@ MonoBehaviour:
   jumpSpeed: 24
   fallMultiplier: 3
   lowJumpMultiplier: 2
-  coyoteTime: 0.3
-  jumpInputTime: 0.5
+  coyoteTime: 0.2
+  jumpInputTime: 0.041
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   groundCheckCenter: {fileID: 3606456115835312876}
   lastGroundedTime: 0
   lastJumpTime: 0
+  isJumping: 0
   dashSpeed: 44
   dashTime: 0.2
   dashCooldown: 8
   dashTrail: {fileID: 993490380431931176}
+  firePoint: {fileID: 3606456115091256683}
+  bulletPrefab: {fileID: 7210760312444873546, guid: 055f33c9d041ff34aa2e0f25134567eb, type: 3}
+  bulletSpeed: 20
 --- !u!1 &3606456115835312877
 GameObject:
   m_ObjectHideFlags: 0
@@ -239,7 +226,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3606456115835312877}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.15, z: 0}
+  m_LocalPosition: {x: 0, y: -0.037, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
