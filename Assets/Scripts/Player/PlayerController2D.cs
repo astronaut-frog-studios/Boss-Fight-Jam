@@ -26,7 +26,7 @@ namespace Player
         private const float groundedSize = 0.025f;
         public float lastGroundedTime;
         public float lastJumpTime;
-        private bool isJumping;
+        public bool isJumping;
         private Vector2 groundBoxSize;
 
         protected virtual void Awake()
@@ -46,7 +46,7 @@ namespace Player
 
             moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), rb.velocity.y);
 
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetButtonDown("Jump") && !isJumping)
             {
                 lastJumpTime = jumpInputTime;
             }
@@ -63,7 +63,7 @@ namespace Player
                 Jump();
             }
 
-            CheckJumpGravity();
+            CheckJumpValues();
         }
 
         private void TimersCheck()
@@ -89,22 +89,23 @@ namespace Player
 
         private void Jump()
         {
+            isJumping = true;
             rb.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
             lastJumpTime = 0;
-            isJumping = true;
+            lastGroundedTime = 0;
         }
 
-        private void CheckJumpGravity()
+        private void CheckJumpValues()
         {
             switch (rb.velocity.y)
             {
-                case < 0:
+                case < 0 when lastGroundedTime <= 0:
                     rb.gravityScale = fallMultiplier;
                     return;
                 case > 0 when !Input.GetButton("Jump"):
                     rb.gravityScale = lowJumpMultiplier;
                     return;
-                default:
+                case 0:
                     rb.gravityScale = 1f;
                     isJumping = false;
                     break;
@@ -113,7 +114,7 @@ namespace Player
 
         private void CheckPlayerDirection()
         {
-            transform.localScale = isFacingRight ? new Vector3(1, 1, 1) : new Vector3(-1, 1, 1);
+            transform.localRotation = isFacingRight ? new Quaternion(0f, 0f, 0f, 0f) : new Quaternion(0f, 180f, 0f, 0f);
 
             if (moveInput.x > 0 && !isFacingRight)
             {
@@ -127,12 +128,12 @@ namespace Player
 
         protected bool IsGrounded()
         {
-            return Physics2D.OverlapBox(groundCheckCenter.position, groundBoxSize, 0f, groundLayer);
+            return !isJumping && Physics2D.OverlapBox(groundCheckCenter.position, groundBoxSize, 0f, groundLayer);
         }
 
         private bool CanJump()
         {
-            return lastGroundedTime > 0 && lastJumpTime >= 0 && !isJumping;
+            return lastGroundedTime > 0 && lastJumpTime > 0 && !isJumping;
         }
     }
 }
