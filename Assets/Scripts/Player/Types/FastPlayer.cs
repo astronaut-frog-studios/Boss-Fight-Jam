@@ -27,7 +27,7 @@ namespace Player.Types
         {
             base.Update();
 
-            if (Input.GetButtonDown("Fire1"))
+            if (ShootInput())
             {
                 Shoot();
             }
@@ -62,6 +62,6 @@ namespace Player.Types
             dashCooldown = initialDashCooldown;
         }
 
-        private bool CanDash => IsGrounded() && Input.GetKeyDown(KeyCode.E) && moveInput.x != 0 && dashCooldown <= 0;
+        private bool CanDash => IsGrounded() && SkillInputPressed() && moveInput.x != 0 && dashCooldown <= 0;
     }
 }

@@ -180,7 +180,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a487deb01ea5134988eb73cd7feaa85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 12
+  isMaster: 1
+  speed: 14.63
   runAcceleration: 5.55
   runDeceleration: 8
   jumpSpeed: 24
@@ -192,9 +193,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   groundCheckCenter: {fileID: 3606456115835312876}
-  lastGroundedTime: 0
-  lastJumpTime: 0
-  isJumping: 0
+  canLockRotation: 0
   dashSpeed: 44
   dashTime: 0.2
   dashCooldown: 8
