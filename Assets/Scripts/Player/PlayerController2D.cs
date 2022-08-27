@@ -5,6 +5,8 @@ namespace Player
 {
     public abstract class PlayerController2D : MonoBehaviour
     {
+        public bool isMaster;
+
         [Header("Run")] [SerializeField] private float speed;
         [SerializeField, Range(0.01f, 10)] private float runAcceleration;
         [SerializeField, Range(0.01f, 10)] private float runDeceleration;
@@ -22,11 +24,12 @@ namespace Player
 
         protected Vector2 moveInput;
         private bool isFacingRight = true;
+        public bool canLockRotation;
 
         private const float groundedSize = 0.025f;
-        public float lastGroundedTime;
-        public float lastJumpTime;
-        public bool isJumping;
+        private float lastGroundedTime;
+        private float lastJumpTime;
+        private bool isJumping;
         private Vector2 groundBoxSize;
 
         protected virtual void Awake()
@@ -42,11 +45,12 @@ namespace Player
 
         protected virtual void Update()
         {
-            TimersCheck();
-
             moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), rb.velocity.y);
+            if (!isMaster) return;
 
-            if (Input.GetButtonDown("Jump") && !isJumping)
+            TimersCheck();
+            
+            if (JumpInputPressed() && !isJumping)
             {
                 lastJumpTime = jumpInputTime;
             }
@@ -56,6 +60,8 @@ namespace Player
 
         protected virtual void FixedUpdate()
         {
+            if (!isMaster) return;
+
             Run();
 
             if (CanJump())
@@ -114,6 +120,8 @@ namespace Player
 
         private void CheckPlayerDirection()
         {
+            if (canLockRotation) return;
+
             transform.localRotation = isFacingRight ? new Quaternion(0f, 0f, 0f, 0f) : new Quaternion(0f, 180f, 0f, 0f);
 
             if (moveInput.x > 0 && !isFacingRight)
@@ -126,6 +134,47 @@ namespace Player
             }
         }
 
+        public void LockPlayerRotation(bool isLocked) => canLockRotation = isLocked;
+
+        #region Inputs
+
+        private static bool JumpInputPressed()
+        {
+            return Input.GetButtonDown("Jump") || Input.GetAxisRaw("Vertical") > 0;
+        }
+
+        private static bool InteractInput()
+        {
+            return Input.GetKeyDown(KeyCode.E);
+        }
+
+        protected static bool SkillInputPressed()
+        {
+            return Input.GetKeyDown(KeyCode.LeftShift);
+        }
+
+        protected static bool SkillInputHold()
+        {
+            return Input.GetKey(KeyCode.LeftShift);
+        }
+
+        protected static bool SkillInputReleased()
+        {
+            return Input.GetKeyUp(KeyCode.LeftShift);
+        }
+
+        protected static bool ShootInput()
+        {
+            return Input.GetButtonDown("Fire2");
+        }
+
+        private static bool MeleeAttackInput()
+        {
+            return Input.GetButtonDown("Fire1");
+        }
+
+        #endregion
+
         protected bool IsGrounded()
         {
             return !isJumping && Physics2D.OverlapBox(groundCheckCenter.position, groundBoxSize, 0f, groundLayer);
@@ -134,6 +183,16 @@ namespace Player
         private bool CanJump()
         {
             return lastGroundedTime > 0 && lastJumpTime > 0 && !isJumping;
+        }
+
+        protected virtual void OnTriggerEnter2D(Collider2D col)
+        {
+            print("triggerEnter");
+        }
+        
+        protected virtual void OnTriggerExit2D(Collider2D col)
+        {
+            print("triggerExit");
         }
     }
 }
