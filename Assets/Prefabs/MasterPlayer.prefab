@@ -551,13 +551,13 @@ MonoBehaviour:
   pushValue: 2.2
   pullValue: 2.6
   liftValue: 3
-  distanceToCarryObj: 3.46
+  liftSpeed: 2
   currentStamina: 0
   carryObj: {fileID: 0}
   canRestoreStamina: 0
   canPushPull: 0
   canLift: 0
-  a: 0
+  triggerExitCall: 0
 --- !u!1 &3606456115835312877
 GameObject:
   m_ObjectHideFlags: 0

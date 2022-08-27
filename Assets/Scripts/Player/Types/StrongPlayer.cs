@@ -16,11 +16,11 @@ namespace Player.Types
         [SerializeField] private Transform objectAttach;
         [SerializeField] private Slider staminaSlider;
 
-        [Header("floats")] [SerializeField] private float pushValue;
+        [Header("pushPull")] [SerializeField] private float pushValue;
         [SerializeField] private float pullValue;
-        [SerializeField] private float liftValue;
 
-        [SerializeField] private float distanceToCarryObj;
+        [Header("Lift")] [SerializeField] private float liftValue;
+        [SerializeField] private float liftSpeed;
 
         // [Header("RayShoot")] [SerializeField] private Transform firePoint;
         // [SerializeField] private GameObject rayPrefab;
@@ -28,12 +28,14 @@ namespace Player.Types
 
         private float currentStamina;
         private GameObject carryObj;
-        private bool canRestoreStamina, canPushPull, canLift;
+        private Vector2 carryObjPos;
+        private bool canRestoreStamina, canPushPull, canLift, triggerExitCall;
 
         protected override void Start()
         {
             currentStamina = maxStamina;
             staminaSlider.maxValue = maxStamina;
+            triggerExitCall = true;
         }
 
         protected override void Update()
@@ -43,23 +45,15 @@ namespace Player.Types
             CheckStamina();
 
             if (!carryObj) return;
-
-            if (Vector2.Distance(transform.position, carryObj.transform.position) > distanceToCarryObj)
-            {
-                carryObj = null;
-                canLift = false;
-                canPushPull = false;
-                return;
-            }
-
             if (SkillInputReleased())
             {
-                carryObj.transform.SetParent(null);
+                OnInputReleased();
 
                 staminaSlider.gameObject.SetActive(false);
                 onUnlockRotation?.Invoke();
 
                 canRestoreStamina = true;
+                triggerExitCall = true;
                 return;
             }
 
@@ -72,13 +66,31 @@ namespace Player.Types
                 staminaSlider.gameObject.SetActive(true);
 
                 canRestoreStamina = false;
+                triggerExitCall = false;
                 return;
             }
 
             if (SkillInputPressed() && canLift)
             {
-                //TODO: Move ojb ??? points up, on Y axis
+                carryObjPos = carryObj.transform.position;
+                carryObjPos += new Vector2(0, liftSpeed);
+                carryObj.transform.position = carryObjPos;
+
+                staminaSlider.gameObject.SetActive(true);
+
+                if (isMaster)
+                {
+                    rb.isKinematic = true;
+                    onLockRotation?.Invoke();
+                }
+
                 canRestoreStamina = false;
+                triggerExitCall = false;
+            }
+
+            if (canLift && !canRestoreStamina)
+            {
+                currentStamina -= liftValue * Time.deltaTime;
             }
         }
 
@@ -111,29 +123,46 @@ namespace Player.Types
             }
         }
 
+        private void OnInputReleased()
+        {
+            if (carryObj.CompareTag("PushPull"))
+            {
+                carryObj.transform.SetParent(null);
+                return;
+            }
+
+            carryObjPos -= new Vector2(0, liftSpeed);
+            carryObj.transform.position = carryObjPos;
+            if (isMaster)
+                rb.isKinematic = false;
+        }
+
         private static bool CanSetCarryObj(Collider2D col) => col.CompareTag("PushPull") || col.CompareTag("Lift");
 
         protected override void OnTriggerEnter2D(Collider2D col)
         {
             base.OnTriggerEnter2D(col);
 
-            if (!CanSetCarryObj(col)) return;
+            if (!CanSetCarryObj(col) || carryObj) return;
 
             carryObj = col.gameObject;
-
             if (col.CompareTag("PushPull"))
                 canPushPull = true;
+            if (col.CompareTag("Lift"))
+                canLift = true;
         }
 
-        // protected override void OnTriggerExit2D(Collider2D col)
-        // {
-        //     base.OnTriggerExit2D(col);
-        //
-        //     if (!CanSetCarryObj(col)) return;
-        //     carryObj = null;
-        //
-        //     if (col.CompareTag("PushPull"))
-        //         canPushPull = false;
-        // }
+        protected override void OnTriggerExit2D(Collider2D col)
+        {
+            base.OnTriggerExit2D(col);
+
+            if (!CanSetCarryObj(col) || !triggerExitCall) return;
+
+            carryObj = null;
+            if (col.CompareTag("PushPull"))
+                canPushPull = false;
+            if (col.CompareTag("Lift"))
+                canLift = false;
+        }
     }
 }
