@@ -6,6 +6,7 @@ namespace Player
     public abstract class PlayerController2D : MonoBehaviour
     {
         public bool isMaster;
+        public bool grounded;
 
         [Header("Run")] [SerializeField] private float speed;
         [SerializeField, Range(0.01f, 10)] private float runAcceleration;
@@ -45,6 +46,8 @@ namespace Player
 
         protected virtual void Update()
         {
+            grounded = IsGrounded();
+            
             moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), rb.velocity.y);
             if (!isMaster) return;
 
@@ -188,6 +191,11 @@ namespace Player
         protected virtual void OnTriggerEnter2D(Collider2D col)
         {
             print("triggerEnter");
+        }
+        
+        protected virtual void OnTriggerStay2D(Collider2D col)
+        {
+            print("triggerStay");
         }
         
         protected virtual void OnTriggerExit2D(Collider2D col)

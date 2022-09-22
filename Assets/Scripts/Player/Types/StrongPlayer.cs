@@ -45,11 +45,12 @@ namespace Player.Types
             CheckStamina();
 
             if (!carryObj) return;
-            if (SkillInputReleased())
+            if (SkillInputReleased() || currentStamina <= 0)
             {
                 OnInputReleased();
 
                 staminaSlider.gameObject.SetActive(false);
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
                 onUnlockRotation?.Invoke();
 
                 canRestoreStamina = true;
@@ -62,8 +63,13 @@ namespace Player.Types
                 carryObj.transform.SetParent(objectAttach);
 
                 CheckMovingDirection();
-                onLockRotation?.Invoke();
                 staminaSlider.gameObject.SetActive(true);
+
+                if (isMaster)
+                {
+                    rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+                    onLockRotation?.Invoke();
+                }
 
                 canRestoreStamina = false;
                 triggerExitCall = false;
@@ -81,6 +87,7 @@ namespace Player.Types
                 if (isMaster)
                 {
                     rb.isKinematic = true;
+                    rb.constraints = RigidbodyConstraints2D.FreezePositionX;
                     onLockRotation?.Invoke();
                 }
 
@@ -139,11 +146,11 @@ namespace Player.Types
 
         private static bool CanSetCarryObj(Collider2D col) => col.CompareTag("PushPull") || col.CompareTag("Lift");
 
-        protected override void OnTriggerEnter2D(Collider2D col)
+        protected override void OnTriggerStay2D(Collider2D col)
         {
-            base.OnTriggerEnter2D(col);
+            base.OnTriggerStay2D(col);
 
-            if (!CanSetCarryObj(col) || carryObj) return;
+            if (!CanSetCarryObj(col) || carryObj || !IsGrounded()) return;
 
             carryObj = col.gameObject;
             if (col.CompareTag("PushPull"))
