@@ -737,6 +737,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: StrongPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 3606456115369684552, guid: 54ecd12dbe8731a4d84538ca41b2c51b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3606456115369684554, guid: 54ecd12dbe8731a4d84538ca41b2c51b, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -1343,7 +1347,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.08256972, y: 0.00000011920929}
+  m_Offset: {x: -0.0825696, y: -0.5948256}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -1354,7 +1358,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 6.7962465, y: 3.3749487}
+  m_Size: {x: 6.7962465, y: 0.32646796}
   m_EdgeRadius: 0
 --- !u!61 &2013647826
 BoxCollider2D:
